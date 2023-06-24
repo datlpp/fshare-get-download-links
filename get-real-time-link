@@ -1,0 +1,45 @@
+(async () => {
+  app = await import(
+    "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"
+  );
+  firestore = await import(
+    "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"
+  );
+  appDone = app.initializeApp({
+    apiKey: "AIzaSyD53U4C33SIH3TEtVDZfb7oRPjUJGXx7tA",
+    authDomain: "fshare-19840.firebaseapp.com",
+    databaseURL:
+      "https://fshare-19840-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "fshare-19840",
+    storageBucket: "fshare-19840.appspot.com",
+    messagingSenderId: "800943274263",
+    appId: "1:800943274263:web:cb5d644904fe1a24c21f52",
+  });
+  db = firestore.getFirestore(appDone);
+  const unsub = firestore.onSnapshot(
+    firestore.doc(db, "links", "GET"),
+    (doc) => {
+      data = doc.data();
+      _csrf = document.querySelector("[name=_csrf-app]").value;
+      if (data.code) {
+        fetch("https://www.fshare.vn/download/get", {
+  "headers": {
+    "accept": "*/*",
+    "accept-language": "en,en-US;q=0.9,vi-VN;q=0.8,vi;q=0.7,zh-TW;q=0.6,zh;q=0.5",
+    "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+  },
+  "body": "_csrf-app=Pk-0tn8S3PFKBOrKusK5k7-s4S2YtfA6l5spUmEsTQJKDevaEVeSnnNFuvn27-nK_MKVGKzhwWji_31jU3Uqbg%3D%3D&linkcode="+data.code+"&ushare=&withFcode5=0",
+  "method": "POST"
+})
+          .then((_) => _.json())
+          .then((_) => {
+            firestore.setDoc(firestore.doc(db, "links", "DOWNLOAD"), {
+              ...data,
+              ..._,
+              created: new Date().getTime(),
+            });
+          });
+      }
+    }
+  );
+})();
